@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRetail CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Light theme (default) ── */
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #f0efe9;
+      --border: rgba(0,0,0,0.1);
+      --border-strong: rgba(0,0,0,0.18);
+      --text: #1a1a18;
+      --text-muted: #6b6b67;
+      --text-faint: #9e9e99;
+      --accent: #1a1a18;
+      --accent-fg: #ffffff;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    /* ── Dark theme ── */
+    [data-theme="dark"] {
+      --bg: #14140f;
+      --surface: #1e1e18;
+      --surface2: #262620;
+      --border: rgba(255,255,255,0.09);
+      --border-strong: rgba(255,255,255,0.16);
+      --text: #f0efe9;
+      --text-muted: #a0a09a;
+      --text-faint: #6b6b65;
+      --accent: #f0efe9;
+      --accent-fg: #14140f;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 2rem;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+    }
+    .header-left h1 {
+      font-size: 22px; font-weight: 500;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+    }
+    .header-left p { font-size: 13px; color: var(--text-faint); }
+    .header-left svg { width: 22px; height: 22px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
+
+    /* ── Theme toggle ── */
+    .theme-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 7px 13px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .theme-btn:hover { background: var(--surface2); color: var(--text); }
+    .theme-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* ── Inputs ── */
+    input {
+      width: 100%;
+      font-family: var(--font); font-size: 13px;
+      padding: 8px 10px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, background 0.2s;
+    }
+    input:focus { border-color: var(--text-muted); box-shadow: 0 0 0 3px rgba(128,128,120,0.12); }
+    input::placeholder { color: var(--text-faint); }
+
+    /* ── Stat bar ── */
+    .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.25rem; }
+    @media (max-width: 520px) { .stats { grid-template-columns: repeat(2,1fr); } }
+    .stat { background: var(--surface2); border-radius: var(--radius-md); padding: 0.875rem 1rem; }
+    .stat-label { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px; }
+    .stat-value { font-size: 22px; font-weight: 500; line-height: 1.2; }
+    .stat-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+    .search-wrap { position: relative; flex: 1; }
+    .search-wrap svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; stroke: var(--text-faint); fill: none; stroke-width: 2;
+      pointer-events: none;
+    }
+    .search-wrap input { padding-left: 32px; }
+
+    .refresh-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      padding: 8px 14px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--accent); color: var(--accent-fg);
+      cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+    }
+    .refresh-btn:hover { opacity: 0.85; }
+    .refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .refresh-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+    /* ── Cards ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+    .card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--border-strong); }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 500;
+    }
+    .card-meta { flex: 1; min-width: 0; }
+    .card-conv { font-family: var(--mono); font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-time { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+    .expand-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--text-faint); font-size: 16px; line-height: 1;
+      border-radius: 4px; flex-shrink: 0;
+    }
+    .expand-btn:hover { color: var(--text-muted); }
+    .summary { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .read-more {
+      background: none; border: none; color: var(--text-faint); font-size: 12px;
+      cursor: pointer; padding: 0 0 0 4px; font-family: var(--font); text-decoration: underline;
+    }
+    .read-more:hover { color: var(--text-muted); }
+    .codes { display: flex; flex-wrap: wrap; gap: 5px; }
+    .code-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 8px; border-radius: var(--radius-md);
+      font-size: 11px; font-weight: 500; border: 0.5px solid;
+    }
+    .code-pill.high { background: #EAF3DE; color: #3B6D11; border-color: #639922; }
+    .code-pill.mid  { background: #FAEEDA; color: #854F0B; border-color: #BA7517; }
+    .code-pill.low  { background: #FCEBEB; color: #A32D2D; border-color: #E24B4A; }
+    [data-theme="dark"] .code-pill.high { background: #173404; color: #C0DD97; border-color: #3B6D11; }
+    [data-theme="dark"] .code-pill.mid  { background: #412402; color: #FAC775; border-color: #854F0B; }
+    [data-theme="dark"] .code-pill.low  { background: #501313; color: #F7C1C1; border-color: #A32D2D; }
+
+    /* ── Error ── */
+    .error {
+      background: #FCEBEB; color: #A32D2D; border: 0.5px solid #E24B4A;
+      border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 13px;
+      margin-bottom: 1rem; display: flex; gap: 8px; align-items: flex-start;
+    }
+    [data-theme="dark"] .error { background: #501313; color: #F7C1C1; border-color: #A32D2D; }
+
+    /* ── Empty ── */
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--text-faint); font-size: 14px; }
+    .empty svg { width: 36px; height: 36px; stroke: var(--text-faint); fill: none; stroke-width: 1.5; display: block; margin: 0 auto 12px; }
+
+    /* ── Misc ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; display: inline-block; }
+    .last-updated { font-size: 11px; color: var(--text-faint); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ╔══════════════════════════════════════════════════════╗
+       ║  ⚙️  SUPABASE CONFIG  —  edit only this block       ║
+       ╚══════════════════════════════════════════════════════╝ -->
+  <script>
+    const SUPABASE_CONFIG = {
+      url:   'https://yfsstyawxecojjqrlssn.supabase.co',  // ← Project URL
+      key:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlmc3N0eWF3eGVjb2pqcXJsc3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTkxOTUsImV4cCI6MjA4NTY5NTE5NX0.nUOWqWrrXI_OyZ69R_hbS_oSFvf3h2IL29vR8AelyDs',                         // ← anon / public key
+      table: 'bot_conversation_summaries',                       // ← table name
+      limit: 50                                       // ← rows per fetch
+    };
+  </script>
+  <!-- ══════════════════════════════════════════════════════ -->
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>
+        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        GRetail CRM
+      </h1>
+      <p>Conversation viewer · live Supabase data</p>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle dark / light mode">
+      <svg id="theme-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span id="theme-label">Dark</span>
+    </button>
+  </div>
+
+  <!-- Error banner -->
+  <div class="error" id="error-box" style="display:none">
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span id="error-msg"></span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="stat-label">Total rows</div><div class="stat-value" id="stat-total">0</div></div>
+    <div class="stat"><div class="stat-label">Wrap-up codes</div><div class="stat-value" id="stat-codes">0</div><div class="stat-sub">unique types</div></div>
+    <div class="stat"><div class="stat-label">Avg confidence</div><div class="stat-value" id="stat-avg">—</div></div>
+    <div class="stat"><div class="stat-label">Showing</div><div class="stat-value" id="stat-filtered">0</div><div class="stat-sub">after filter</div></div>
+  </div>
+
+  <!-- Search + Refresh toolbar -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Search by summary or conversation ID…" oninput="filterCards()" />
+    </div>
+    <button class="refresh-btn" onclick="fetchData()" id="refresh-btn">
+      <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="last-updated" id="last-updated" style="display:none"></div>
+
+  <!-- Cards -->
+  <div class="grid" id="grid"></div>
+
+  <!-- Idle / empty state -->
+  <div class="empty" id="empty-state">
+    <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8M8 13h5m-9 7V5a2 2 0 012-2h10a2 2 0 012 2v16l-4-2-2 1-2-1-4 2z"/></svg>
+    Loading data…
+  </div>
+
+</div>
+<script>
+  let allRows = [];
+
+  /* ── Theme toggle ── */
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+    const icon = document.getElementById('theme-icon');
+    if (isDark) {
+      icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    } else {
+      icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+  }
+
+  /* ── Helpers ── */
+  const avatarPairs = [
+    { bg:'#E6F1FB', tc:'#185FA5' },
+    { bg:'#E1F5EE', tc:'#0F6E56' },
+    { bg:'#FAEEDA', tc:'#854F0B' },
+    { bg:'#EEEDFE', tc:'#534AB7' },
+    { bg:'#FBEAF0', tc:'#993556' },
+  ];
+
+  function scoreClass(s) {
+    if (s >= 0.8) return 'high';
+    if (s >= 0.6) return 'mid';
+    return 'low';
+  }
+
+  function parseCodes(raw) {
+    try {
+      const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return Array.isArray(p) ? p : [p];
+    } catch { return []; }
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    const date = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+    const time = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    return `${date} · ${time}`;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── Card builder ── */
+  function buildCard(row, idx) {
+    const ap = avatarPairs[idx % avatarPairs.length];
+    const codes = parseCodes(row.wrap_up_code_name);
+    const fullSummary = row.summary_text || '';
+    const convShort = row.conversation_id ? row.conversation_id.slice(0, 8) + '…' : '—';
+    const cardId = 'card-' + (row.id || idx);
+    const pillsHtml = codes.map(c => `
+      <span class="code-pill ${scoreClass(c.score || 0)}">
+        ${escHtml(c.name || '?')}
+        <span style="opacity:.8">${Math.round((c.score || 0) * 100)}%</span>
+      </span>`).join('');
+    return `
+      <div class="card" id="${cardId}">
+        <div class="card-header">
+          <div class="avatar" style="background:${ap.bg};color:${ap.tc}">#${row.id}</div>
+          <div class="card-meta">
+            <div class="card-conv" title="${escHtml(row.conversation_id || '')}">${escHtml(convShort)}</div>
+            <div class="card-time">${formatDate(row.created_at)}</div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand('${cardId}')" title="Expand">▾</button>
+        </div>
+        <div class="summary" data-full="${escAttr(fullSummary)}" data-expanded="false">
+          ${fullSummary.length > 140
+            ? escHtml(fullSummary.slice(0,140)) + '… <button class="read-more" onclick="toggleSummary(this)">more</button>'
+            : escHtml(fullSummary)}
+        </div>
+        ${codes.length ? `<div class="codes">${pillsHtml}</div>` : ''}
+      </div>`;
+  }
+
+  function toggleSummary(btn) {
+    const el = btn.closest('.summary');
+    const full = el.getAttribute('data-full');
+    const expanded = el.getAttribute('data-expanded') === 'true';
+    el.innerHTML = expanded
+      ? escHtml(full.slice(0,140)) + '… <button class="read-more" onclick="toggleSummary(this)">more</button>'
+      : escHtml(full) + ' <button class="read-more" onclick="toggleSummary(this)">less</button>';
+    el.setAttribute('data-expanded', String(!expanded));
+  }
+
+  function toggleExpand(cardId) {
+    const summaryEl = document.getElementById(cardId).querySelector('.summary');
+    toggleSummary({ closest: () => summaryEl });
+  }
+
+  /* ── Stats ── */
+  function renderStats(rows, filtered) {
+    const allCodes = rows.flatMap(r => parseCodes(r.wrap_up_code_name).map(c => c.name));
+    const unique = [...new Set(allCodes)].length;
+    const scores = rows.flatMap(r => parseCodes(r.wrap_up_code_name).map(c => c.score || 0));
+    const avg = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 100) + '%' : '—';
+    document.getElementById('stat-total').textContent = rows.length;
+    document.getElementById('stat-codes').textContent = unique;
+    document.getElementById('stat-avg').textContent = avg;
+    document.getElementById('stat-filtered').textContent = filtered.length;
+  }
+
+  /* ── Filter ── */
+  function filterCards() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const filtered = q
+      ? allRows.filter(r => (r.summary_text||'').toLowerCase().includes(q) || (r.conversation_id||'').toLowerCase().includes(q))
+      : allRows;
+    document.getElementById('grid').innerHTML = filtered.map((r,i) => buildCard(r,i)).join('');
+    document.getElementById('stat-filtered').textContent = filtered.length;
+    const empty = document.getElementById('empty-state');
+    if (filtered.length === 0) {
+      empty.style.display = 'block';
+      empty.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>No results match your search.';
+    } else {
+      empty.style.display = 'none';
+    }
+  }
+
+  /* ── Fetch from Supabase ── */
+  async function fetchData() {
+    const { url, key, table, limit } = SUPABASE_CONFIG;
+
+    if (!url || !key || !table || url.includes('YOUR_') || key.includes('YOUR_')) {
+      document.getElementById('error-msg').textContent =
+        'Open the HTML file in a text editor and fill in SUPABASE_CONFIG at the top (url, key, table).';
+      document.getElementById('error-box').style.display = 'flex';
+      document.getElementById('empty-state').style.display = 'none';
+      return;
+    }
+
+    const btn = document.getElementById('refresh-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner">⟳</span> Loading…'; }
+    document.getElementById('error-box').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'none';
+
+    try {
+      const endpoint = `${url.replace(/\/$/,'')}/rest/v1/${table}?select=*&limit=${limit}&order=created_at.desc`;
+      const res = await fetch(endpoint, {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation'
+        }
+      });
+      if (!res.ok) throw new Error((await res.text()) || res.statusText);
+
+      const data = await res.json();
+      allRows = data;
+
+      if (!data.length) {
+        document.getElementById('empty-state').style.display = 'block';
+        document.getElementById('empty-state').innerHTML =
+          '<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8M8 13h5m-9 7V5a2 2 0 012-2h10a2 2 0 012 2v16l-4-2-2 1-2-1-4 2z"/></svg>Table is empty or returned no rows.';
+      } else {
+        renderStats(data, data);
+        document.getElementById('stats').style.display = 'grid';
+        document.getElementById('toolbar').style.display = 'flex';
+        const ts = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        const lu = document.getElementById('last-updated');
+        lu.style.display = 'block';
+        lu.textContent = `Last updated at ${ts}`;
+        document.getElementById('grid').innerHTML = data.map((r,i) => buildCard(r,i)).join('');
+      }
+    } catch (e) {
+      document.getElementById('error-msg').textContent = e.message;
+      document.getElementById('error-box').style.display = 'flex';
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Refresh';
+      }
+    }
+  }
+
+  /* ── Auto-load on page open ── */
+  window.onload = () => fetchData();
+</script>
+</body>
+</html>
