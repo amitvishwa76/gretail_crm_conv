@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GRetail CRM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&family=Urbanist:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -55,40 +55,15 @@
     /* ── Header ── */
     .header {
       margin-bottom: 2rem;
-      display: flex; align-items: center;
+      display: flex; align-items: flex-start;
       justify-content: space-between; gap: 12px;
     }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-
-    /* Logo badge */
-    .logo-badge {
-      width: 46px; height: 46px; border-radius: 12px;
-      background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(255,106,0,0.35);
+    .header-left h1 {
+      font-size: 22px; font-weight: 500;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
     }
-    .logo-badge svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; }
-
-    .logo-text { display: flex; flex-direction: column; gap: 2px; }
-    .logo-text h1 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 28px; font-weight: 800; line-height: 1;
-      letter-spacing: -0.2px;
-      background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .logo-text p { font-size: 12px; color: var(--text-faint); letter-spacing: 0.02em; }
-
-    /* Card field labels */
-    .field-label {
-      font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
-      color: var(--text-faint); font-weight: 500; margin-bottom: 2px;
-    }
-    .field-value { font-size: 13px; color: var(--text-muted); }
-    .field-row { display: flex; flex-direction: column; gap: 1px; }
+    .header-left p { font-size: 13px; color: var(--text-faint); }
+    .header-left svg { width: 22px; height: 22px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
 
     /* ── Theme toggle ── */
     .theme-btn {
@@ -224,7 +199,7 @@
       url:   'https://yfsstyawxecojjqrlssn.supabase.co',  // ← Project URL
       key:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlmc3N0eWF3eGVjb2pqcXJsc3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTkxOTUsImV4cCI6MjA4NTY5NTE5NX0.nUOWqWrrXI_OyZ69R_hbS_oSFvf3h2IL29vR8AelyDs',                         // ← anon / public key
       table: 'bot_conversation_summaries',                       // ← table name
-      limit: 50                                        // ← rows per fetch
+      limit: 50                                       // ← rows per fetch
     };
   </script>
   <!-- ══════════════════════════════════════════════════════ -->
@@ -232,13 +207,11 @@
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <div class="logo-badge">
-        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-      </div>
-      <div class="logo-text">
-        <h1>GRetail CRM</h1>
-        <p>Conversation viewer · live Supabase data</p>
-      </div>
+      <h1>
+        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        GRetail CRM
+      </h1>
+      <p>Conversation viewer · live Supabase data</p>
     </div>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle dark / light mode">
       <svg id="theme-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -344,6 +317,7 @@
     const ap = avatarPairs[idx % avatarPairs.length];
     const codes = parseCodes(row.wrap_up_code_name);
     const fullSummary = row.summary_text || '';
+    const convShort = row.conversation_id ? row.conversation_id.slice(0, 8) + '…' : '—';
     const cardId = 'card-' + (row.id || idx);
     const pillsHtml = codes.map(c => `
       <span class="code-pill ${scoreClass(c.score || 0)}">
@@ -352,47 +326,20 @@
       </span>`).join('');
     return `
       <div class="card" id="${cardId}">
-
-        <!-- Row: id + created_at -->
-        <div style="display:flex;align-items:flex-start;gap:10px;">
-          <div class="avatar" style="background:${ap.bg};color:${ap.tc};flex-shrink:0;">#${row.id}</div>
-          <div style="flex:1;min-width:0;">
-            <div class="field-label">id</div>
-            <div class="field-value" style="font-weight:500;color:var(--text);">${row.id}</div>
+        <div class="card-header">
+          <div class="avatar" style="background:${ap.bg};color:${ap.tc}">#${row.id}</div>
+          <div class="card-meta">
+            <div class="card-conv" title="${escHtml(row.conversation_id || '')}">${escHtml(convShort)}</div>
+            <div class="card-time">${formatDate(row.created_at)}</div>
           </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div class="field-label">created_at</div>
-            <div class="field-value" style="font-size:11px;">${formatDate(row.created_at)}</div>
-          </div>
+          <button class="expand-btn" onclick="toggleExpand('${cardId}')" title="Expand">▾</button>
         </div>
-
-        <div style="height:0.5px;background:var(--border);"></div>
-
-        <!-- conversation_id -->
-        <div class="field-row">
-          <div class="field-label">conversation_id</div>
-          <div class="field-value" style="font-family:var(--mono);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(row.conversation_id || '')}">
-            ${escHtml(row.conversation_id || '—')}
-          </div>
+        <div class="summary" data-full="${escAttr(fullSummary)}" data-expanded="false">
+          ${fullSummary.length > 140
+            ? escHtml(fullSummary.slice(0,140)) + '… <button class="read-more" onclick="toggleSummary(this)">more</button>'
+            : escHtml(fullSummary)}
         </div>
-
-        <!-- summary_text -->
-        <div class="field-row">
-          <div class="field-label">summary_text</div>
-          <div class="summary" data-full="${escAttr(fullSummary)}" data-expanded="false">
-            ${fullSummary.length > 160
-              ? escHtml(fullSummary.slice(0,160)) + '… <button class="read-more" onclick="toggleSummary(this)">more</button>'
-              : escHtml(fullSummary) || '<span style="color:var(--text-faint)">—</span>'}
-          </div>
-        </div>
-
-        <!-- wrap_up_code_name -->
-        ${codes.length ? `
-        <div class="field-row">
-          <div class="field-label">wrap_up_code_name</div>
-          <div class="codes">${pillsHtml}</div>
-        </div>` : ''}
-
+        ${codes.length ? `<div class="codes">${pillsHtml}</div>` : ''}
       </div>`;
   }
 
